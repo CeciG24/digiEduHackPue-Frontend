@@ -1,3 +1,5 @@
+// ...existing code...
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { ModulePlanetCard } from '../ui-sci-fi/ModulePlanetCard';
 import { ChevronRight } from 'lucide-react';
@@ -9,24 +11,64 @@ interface ModuleMapProps {
   onBack: () => void;
 }
 
-export function ModuleMap({ moduleId, pathId, onNavigate, onBack }: ModuleMapProps) {
-  // Mock data - would come from props/API
-  const moduleData = {
-    title: 'Redes Neuronales',
-    description: 'Explora las lecciones sobre arquitecturas neuronales, backpropagation y funciones de activación',
-    progress: 100
-  };
+interface Lesson {
+  id: string;
+  title: string;
+  completed: boolean;
+  angle?: number;
+}
 
-  const lessons = [
-    { id: 'lesson-1', title: 'Introducción a Redes Neuronales', completed: true, angle: 0 },
-    { id: 'lesson-2', title: 'Perceptrón y Modelo Lineal', completed: true, angle: 45 },
-    { id: 'lesson-3', title: 'Funciones de Activación', completed: true, angle: 90 },
-    { id: 'lesson-4', title: 'Backpropagation', completed: true, angle: 135 },
-    { id: 'lesson-5', title: 'Optimización y Gradientes', completed: true, angle: 180 },
-    { id: 'lesson-6', title: 'Regularización', completed: true, angle: 225 },
-    { id: 'lesson-7', title: 'Dropout y Batch Norm', completed: true, angle: 270 },
-    { id: 'lesson-8', title: 'Arquitecturas Profundas', completed: true, angle: 315 }
-  ];
+interface ModuleData {
+  title: string;
+  description: string;
+  progress: number;
+}
+
+export function ModuleMap({ moduleId, pathId, onNavigate, onBack }: ModuleMapProps) {
+  // Estados para datos remotos
+  const [moduleData, setModuleData] = useState<ModuleData>({ title: '', description: '', progress: 0 });
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const ac = new AbortController();
+
+    async function fetchModule() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Ajusta este endpoint según tu backend
+        const url = 'http://localhost:5000' + `/modulos/${moduleId}`;
+        const res = await fetch(url, { signal: ac.signal });
+
+        if (!res.ok) {
+          throw new Error(`Error ${res.status} al obtener el módulo`);
+        }
+
+        const data = await res.json();
+
+        // Soporta respuesta { module: {...}, lessons: [...] } o { title, description, progress, lessons }
+        const md = data.module ?? {
+          title: data.title ?? '',
+          description: data.description ?? '',
+          progress: data.progress ?? 0
+        };
+
+        setModuleData(md);
+        setLessons(Array.isArray(data.lessons) ? data.lessons : []);
+      } catch (e: any) {
+        if (e.name === 'AbortError') return;
+        setError(e.message ?? 'Error al cargar el módulo');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchModule();
+    return () => ac.abort();
+  }, [moduleId, pathId]);
 
   const handleLessonClick = (lessonId: string) => {
     // Randomly decide between lesson viewer and assessment
@@ -54,9 +96,9 @@ export function ModuleMap({ moduleId, pathId, onNavigate, onBack }: ModuleMapPro
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h2 className="text-cyan-400 mb-2">{moduleData.title}</h2>
+          <h2 className="text-cyan-400 mb-2">{moduleData.title || 'Cargando módulo...'}</h2>
           <p className="text-slate-400">{moduleData.description}</p>
-          
+
           {/* Progress */}
           <div className="mt-4 flex items-center gap-4">
             <div className="flex-1 max-w-md">
@@ -76,43 +118,50 @@ export function ModuleMap({ moduleId, pathId, onNavigate, onBack }: ModuleMapPro
           </div>
         </motion.div>
 
-        {/* Module Map */}
-        <div className="relative rounded-lg border-2 border-cyan-500/30 bg-gradient-to-br from-slate-900/50 to-purple-900/20 backdrop-blur-sm overflow-hidden">
-          {/* Grid overlay */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="w-full h-full" style={{
-              backgroundImage: `
-                linear-gradient(to right, rgba(6, 182, 212, 0.3) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(6, 182, 212, 0.3) 1px, transparent 1px)
-              `,
-              backgroundSize: '40px 40px'
-            }} />
+        {/* Estado de carga / error */}
+        {loading ? (
+          <div className="py-12 text-center text-slate-400">Cargando mapa del módulo...</div>
+        ) : error ? (
+          <div className="py-12 text-center text-red-400">Error: {error}</div>
+        ) : (
+          /* Module Map */
+          <div className="relative rounded-lg border-2 border-cyan-500/30 bg-gradient-to-br from-slate-900/50 to-purple-900/20 backdrop-blur-sm overflow-hidden">
+            {/* Grid overlay */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="w-full h-full" style={{
+                backgroundImage: `
+                  linear-gradient(to right, rgba(6, 182, 212, 0.3) 1px, transparent 1px),
+                  linear-gradient(to bottom, rgba(6, 182, 212, 0.3) 1px, transparent 1px)
+                `,
+                backgroundSize: '40px 40px'
+              }} />
+            </div>
+
+            {/* SVG with planet and satellites */}
+            <svg className="w-full" viewBox="0 0 800 700" preserveAspectRatio="xMidYMid meet">
+              {/* Background */}
+              <defs>
+                <radialGradient id="moduleBg">
+                  <stop offset="0%" stopColor="rgba(6, 182, 212, 0.05)" />
+                  <stop offset="100%" stopColor="rgba(15, 23, 42, 0)" />
+                </radialGradient>
+              </defs>
+              <rect width="800" height="700" fill="url(#moduleBg)" />
+
+              {/* Module Planet with Lesson Satellites */}
+              <ModulePlanetCard
+                id={moduleId}
+                title={moduleData.title}
+                description={moduleData.description}
+                progress={moduleData.progress}
+                color="purple"
+                position={{ x: 400, y: 350 }}
+                lessons={lessons}
+                onLessonClick={handleLessonClick}
+              />
+            </svg>
           </div>
-
-          {/* SVG with planet and satellites */}
-          <svg className="w-full" viewBox="0 0 800 700" preserveAspectRatio="xMidYMid meet">
-            {/* Background */}
-            <defs>
-              <radialGradient id="moduleBg">
-                <stop offset="0%" stopColor="rgba(6, 182, 212, 0.05)" />
-                <stop offset="100%" stopColor="rgba(15, 23, 42, 0)" />
-              </radialGradient>
-            </defs>
-            <rect width="800" height="700" fill="url(#moduleBg)" />
-
-            {/* Module Planet with Lesson Satellites */}
-            <ModulePlanetCard
-              id={moduleId}
-              title={moduleData.title}
-              description={moduleData.description}
-              progress={moduleData.progress}
-              color="purple"
-              position={{ x: 400, y: 350 }}
-              lessons={lessons}
-              onLessonClick={handleLessonClick}
-            />
-          </svg>
-        </div>
+        )}
 
         {/* Instructions */}
         <motion.div

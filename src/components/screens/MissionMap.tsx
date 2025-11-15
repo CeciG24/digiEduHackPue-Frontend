@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { ConstellationCard } from '../ui-sci-fi/ConstellationCard';
 import { Search } from 'lucide-react';
@@ -18,78 +19,67 @@ interface LearningPath {
 }
 
 export function MissionMap({ onNavigate }: MissionMapProps) {
-  const learningPaths: LearningPath[] = [
-    {
-      id: 'ai-fundamentals',
-      title: 'IA y Machine Learning',
-      description: 'Fundamentos de inteligencia artificial y aprendizaje automático',
-      progress: 67,
-      moduleCount: 5,
-      color: 'cyan',
-      position: { x: 200, y: 150 },
-      stars: [
-        { x: -40, y: -30 },
-        { x: -20, y: 0 },
-        { x: 0, y: -40 },
-        { x: 20, y: -10 },
-        { x: 40, y: 20 }
-      ]
-    },
-    {
-      id: 'quantum-computing',
-      title: 'Computación Cuántica',
-      description: 'Principios de mecánica cuántica aplicados a la computación',
-      progress: 45,
-      moduleCount: 4,
-      color: 'purple',
-      position: { x: 600, y: 180 },
-      stars: [
-        { x: -35, y: -25 },
-        { x: 0, y: -35 },
-        { x: 30, y: -20 },
-        { x: 15, y: 15 }
-      ]
-    },
-    {
-      id: 'space-science',
-      title: 'Ciencias Espaciales',
-      description: 'Astrofísica, cosmología y exploración espacial',
-      progress: 30,
-      moduleCount: 6,
-      color: 'teal',
-      position: { x: 400, y: 400 },
-      stars: [
-        { x: -45, y: 0 },
-        { x: -25, y: -30 },
-        { x: 0, y: -15 },
-        { x: 25, y: -25 },
-        { x: 40, y: 5 },
-        { x: 20, y: 25 }
-      ]
-    },
-    {
-      id: 'biotechnology',
-      title: 'Biotecnología Avanzada',
-      description: 'Ingeniería genética y aplicaciones CRISPR',
-      progress: 20,
-      moduleCount: 4,
-      color: 'magenta',
-      position: { x: 150, y: 450 },
-      stars: [
-        { x: -30, y: -20 },
-        { x: 0, y: -30 },
-        { x: 30, y: -15 },
-        { x: 0, y: 15 }
-      ]
+  const [learningPaths, setLearningPaths] = useState<LearningPath[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    async function loadPaths() {
+      setLoading(true);
+      setError(null);
+      try {
+  const base = 'https://digieduhackpue-backend.onrender.com';
+  const res = await fetch(`${base}/rutas`, { signal });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+  const api = await res.json();
+  console.log("RESPUESTA API:", api);
+
+  const mapped = (api.data ?? []).map((item: any, index: number) => ({
+  id: String(item.id),
+  title: item.titulo,
+  description: item.descripcion,
+  progress: 0,
+  moduleCount: 0,
+  color: "cyan",
+  position: { 
+    x: 150 + (index * 200),   // separa horizontalmente
+    y: 300                    // todos alineados en el centro vertical
+  },
+  stars: generateStars(),      // opcional (abajo te pongo esto)
+}));
+
+        function generateStars(count = 4) {
+  return Array.from({ length: count }).map(() => ({
+    x: Math.random() * 80 - 40,
+    y: Math.random() * 80 - 40
+  }));
+}
+
+
+  setLearningPaths(mapped);
+}catch (err: any) {
+        if (err.name === 'AbortError') return;
+        setError(err.message ?? 'Error al cargar rutas');
+        setLearningPaths([]);
+      } finally {
+        setLoading(false);
+      }
     }
-  ];
+
+    loadPaths();
+    return () => controller.abort();
+  }, []);
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-8 pl-24 md:pl-72">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="max-w-7xl mx-auto"
+        className="max-w-6xl mx-auto"
       >
         {/* Header */}
         <div className="mb-8 flex items-start justify-between">
@@ -122,6 +112,12 @@ export function MissionMap({ onNavigate }: MissionMapProps) {
             }} />
           </div>
 
+          {/* Estado de carga / error */}
+          <div className="p-6">
+            {loading && <div className="text-slate-400">Cargando rutas...</div>}
+            {error && <div className="text-red-400">Error: {error}</div>}
+          </div>
+
           {/* SVG Map */}
           <svg className="w-full" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
             {/* Background gradient */}
@@ -134,7 +130,7 @@ export function MissionMap({ onNavigate }: MissionMapProps) {
             <rect width="800" height="600" fill="url(#bgGradient)" />
 
             {/* Learning Path Constellations */}
-            {learningPaths.map((path) => (
+            {(learningPaths ?? []).map((path) => (
               <ConstellationCard
                 key={path.id}
                 id={path.id}
