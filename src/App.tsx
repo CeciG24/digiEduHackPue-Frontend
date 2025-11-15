@@ -9,6 +9,9 @@ import { LessonViewer } from './components/screens/LessonViewer';
 import { Assessment } from './components/screens/Assessment';
 import { AICore } from './components/screens/AICore';
 import { AccessibilityTools } from './components/screens/AccessibilityTools';
+import { Login } from './components/screens/Login';
+import { Register } from './components/screens/Register';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 interface NavigationData {
   pathId?: string;
@@ -16,9 +19,11 @@ interface NavigationData {
   lessonId?: string;
 }
 
-export default function App() {
-  const [currentScreen, setCurrentScreen] = useState('welcome');
+function AppContent() {
+  const { isAuthenticated } = useAuth();
+  const [currentScreen, setCurrentScreen] = useState(isAuthenticated ? 'welcome' : 'login');
   const [navigationData, setNavigationData] = useState<NavigationData>({});
+  const [authScreen, setAuthScreen] = useState<'login' | 'register'>('login');
 
   const handleNavigate = (screen: string, data?: NavigationData) => {
     setCurrentScreen(screen);
@@ -28,7 +33,6 @@ export default function App() {
   };
 
   const handleBack = () => {
-    // Navigate back based on current screen
     if (currentScreen === 'path-overview') {
       setCurrentScreen('map');
     } else if (currentScreen === 'module-map') {
@@ -39,6 +43,26 @@ export default function App() {
   };
 
   const renderScreen = () => {
+    // Auth screens
+    if (!isAuthenticated) {
+      if (authScreen === 'login') {
+        return (
+          <Login 
+            onNavigate={() => setCurrentScreen('welcome')}
+            onSwitchToRegister={() => setAuthScreen('register')}
+          />
+        );
+      } else {
+        return (
+          <Register 
+            onNavigate={() => setCurrentScreen('welcome')}
+            onSwitchToLogin={() => setAuthScreen('login')}
+          />
+        );
+      }
+    }
+
+    // Main app screens
     switch (currentScreen) {
       case 'welcome':
         return <WelcomeConsole onNavigate={handleNavigate} />;
@@ -82,11 +106,19 @@ export default function App() {
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-cyan-900/20 via-transparent to-transparent pointer-events-none" />
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent pointer-events-none" />
       
-      <Navigation currentScreen={currentScreen} onNavigate={handleNavigate} />
+      {isAuthenticated && <Navigation currentScreen={currentScreen} onNavigate={handleNavigate} />}
       
-      <main className="relative z-10 ml-20">
+      <main className={isAuthenticated ? 'relative z-10 ml-20' : 'relative z-10'}>
         {renderScreen()}
       </main>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

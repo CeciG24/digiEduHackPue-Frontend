@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
-import { Home, Map, BookOpen, Target, Brain, Settings } from 'lucide-react';
+import { Home, Map, BookOpen, Target, Brain, Settings, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface NavigationProps {
   currentScreen: string;
@@ -7,6 +8,13 @@ interface NavigationProps {
 }
 
 export function Navigation({ currentScreen, onNavigate }: NavigationProps) {
+  const { logout, user } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    window.location.reload(); // Reload to reset to login screen
+  };
+
   const navItems = [
     { id: 'welcome', icon: Home, label: 'Mission Control' },
     { id: 'map', icon: Map, label: 'Mission Map' },
@@ -26,7 +34,7 @@ export function Navigation({ currentScreen, onNavigate }: NavigationProps) {
 
   return (
     <nav className="fixed left-0 top-0 h-screen w-20 backdrop-blur-xl bg-slate-950/80 border-r border-cyan-500/30 z-40">
-      <div className="flex flex-col items-center py-6 gap-6">
+      <div className="flex flex-col items-center py-6 gap-6 h-full">
         {/* Logo */}
         <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.6)]">
           <span className="font-bold text-white">LH</span>
@@ -70,6 +78,36 @@ export function Navigation({ currentScreen, onNavigate }: NavigationProps) {
               </motion.button>
             );
           })}
+        </div>
+
+        {/* Logout and User Info - Fixed at bottom */}
+        <div className="mt-auto flex flex-col items-center gap-3 mb-6">
+          {user && (
+            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-400 to-pink-600 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.6)] group relative">
+              <span className="font-bold text-white text-xs">
+                {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+              </span>
+              
+              {/* User tooltip */}
+              <div className="absolute left-16 px-3 py-2 bg-slate-900 border border-cyan-400/50 rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                <span className="text-sm text-cyan-400">{user.name}</span>
+              </div>
+            </div>
+          )}
+
+          <motion.button
+            onClick={handleLogout}
+            className="w-12 h-12 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-300 group"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <LogOut className="w-6 h-6" />
+            
+            {/* Logout tooltip */}
+            <div className="absolute left-16 px-3 py-2 bg-slate-900 border border-red-400/50 rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              <span className="text-sm text-red-400">Logout</span>
+            </div>
+          </motion.button>
         </div>
       </div>
     </nav>
