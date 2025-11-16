@@ -16,7 +16,7 @@ export function Navigation({ currentScreen, onNavigate }: NavigationProps) {
   const navItems = [
     { id: 'welcome', icon: Home, label: 'Mission Control' },
     { id: 'map', icon: Map, label: 'Mission Map' },
-    { id: 'teacher', icon: UserCog, label: 'Teacher Dashboard' },
+    { id: 'teacher-dashboard', icon: UserCog, label: 'Teacher Dashboard' },
     { id: 'lesson', icon: BookOpen, label: 'Lección' },
     { id: 'assessment', icon: Target, label: 'Evaluación' },
     { id: 'ai-core', icon: Brain, label: 'IA Core' },
