@@ -1,91 +1,92 @@
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { GlassPanel } from '../ui-sci-fi/GlassPanel';
-import { HolographicButton } from '../ui-sci-fi/HolographicButton';
-import { NeonDivider } from '../ui-sci-fi/NeonDivider';
-import { CheckCircle2, Circle, ChevronRight, Brain, Clock, Award } from 'lucide-react';
+import { ChevronRight, BookOpen, Clock, CheckCircle } from 'lucide-react';
 
-interface LearningPathOverviewProps {
+interface PathOverviewProps {
   pathId: string;
   onNavigate: (screen: string, data?: any) => void;
   onBack: () => void;
 }
 
 interface Module {
-  id: string;
-  title: string;
-  description: string;
-  lessonCount: number;
-  completed: boolean;
-  progress: number;
-  estimatedTime: string;
+  id_modulo: number;
+  id_ruta: number;
+  titulo: string;
+  descripcion: string;
+  orden: number;
+  progress?: number;
 }
 
-export function LearningPathOverview({ pathId, onNavigate, onBack }: LearningPathOverviewProps) {
-  // Mock data - in real app, this would come from props or API
-  const pathData = {
-    'ai-fundamentals': {
-      title: 'IA y Machine Learning',
-      description: 'Domina los fundamentos de la inteligencia artificial y el aprendizaje automático. Desde conceptos básicos hasta implementaciones prácticas con redes neuronales, algoritmos de optimización y aplicaciones del mundo real.',
-      progress: 67,
-      totalLessons: 45,
-      completedLessons: 30,
-      estimatedTime: '24 horas',
-      color: 'cyan' as const,
-      modules: [
-        {
-          id: 'intro-ai',
-          title: 'Introducción a la IA',
-          description: 'Conceptos fundamentales y historia de la inteligencia artificial',
-          lessonCount: 8,
-          completed: true,
-          progress: 100,
-          estimatedTime: '3 horas'
-        },
-        {
-          id: 'neural-networks',
-          title: 'Redes Neuronales',
-          description: 'Arquitecturas, backpropagation y funciones de activación',
-          lessonCount: 12,
-          completed: true,
-          progress: 100,
-          estimatedTime: '6 horas'
-        },
-        {
-          id: 'deep-learning',
-          title: 'Deep Learning',
-          description: 'CNNs, RNNs, y arquitecturas avanzadas',
-          lessonCount: 10,
-          completed: false,
-          progress: 60,
-          estimatedTime: '8 horas'
-        },
-        {
-          id: 'nlp',
-          title: 'Procesamiento de Lenguaje Natural',
-          description: 'Transformers, BERT, GPT y aplicaciones de NLP',
-          lessonCount: 9,
-          completed: false,
-          progress: 0,
-          estimatedTime: '5 horas'
-        },
-        {
-          id: 'ml-production',
-          title: 'ML en Producción',
-          description: 'Deployment, MLOps y mejores prácticas',
-          lessonCount: 6,
-          completed: false,
-          progress: 0,
-          estimatedTime: '4 horas'
+interface PathData {
+  title: string;
+  description: string;
+}
+
+export function LearningPathOverview({ pathId, onNavigate, onBack }: PathOverviewProps) {
+  const [pathData, setPathData] = useState<PathData>({ title: '', description: '' });
+  const [modules, setModules] = useState<Module[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log("🔍 PathOverview montado con pathId:", pathId);
+    
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    async function loadModules() {
+      setLoading(true);
+      setError(null);
+      try {
+        const base = 'https://digieduhackpue-backend.onrender.com';
+        const url = `${base}/modulos/ruta/${pathId}`;
+        console.log("📡 Fetching:", url);
+        
+        const res = await fetch(url, { signal });
+        
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const api = await res.json();
+        console.log("✅ MÓDULOS DE LA RUTA:", api);
+
+        if (api.success && api.data) {
+          // Ordenar módulos por el campo 'orden'
+          const sortedModules = api.data.sort((a: Module, b: Module) => a.orden - b.orden);
+          setModules(sortedModules);
+          
+          // Si necesitas info adicional de la ruta, podrías hacer otro fetch aquí
+          // Por ahora usamos datos básicos
+          setPathData({
+            title: `Ruta de Aprendizaje ${pathId}`,
+            description: 'Selecciona un módulo para comenzar tu viaje de aprendizaje'
+          });
         }
-      ]
+      } catch (err: any) {
+        if (err.name === 'AbortError') return;
+        setError(err.message ?? 'Error al cargar módulos');
+        setModules([]);
+      } finally {
+        setLoading(false);
+      }
     }
+
+    loadModules();
+    return () => controller.abort();
+  }, [pathId]);
+
+  const handleModuleClick = (moduleId: number) => {
+    onNavigate('module-map', { moduleId: String(moduleId), pathId });
   };
 
-  const path = pathData[pathId as keyof typeof pathData] || pathData['ai-fundamentals'];
+  const getModuleProgress = (module: Module) => {
+    // Aquí podrías calcular el progreso real desde tu backend
+    // Por ahora retorna 0 o un valor simulado
+    return module.progress ?? 0;
+  };
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen p-8 pl-24 md:pl-72">
+      <div className="max-w-5xl mx-auto">
         {/* Back button */}
         <motion.button
           onClick={onBack}
@@ -93,7 +94,7 @@ export function LearningPathOverview({ pathId, onNavigate, onBack }: LearningPat
           whileHover={{ x: -5 }}
         >
           <ChevronRight className="w-4 h-4 rotate-180" />
-          <span>Volver al Mapa</span>
+          <span>Volver al Mapa de Rutas</span>
         </motion.button>
 
         {/* Header */}
@@ -102,156 +103,129 @@ export function LearningPathOverview({ pathId, onNavigate, onBack }: LearningPat
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h1 className={`text-${path.color}-400 mb-3`}>{path.title}</h1>
-              <p className="text-slate-300 max-w-3xl">
-                {path.description}
-              </p>
+          <h2 className="text-cyan-400 mb-2">{pathData.title}</h2>
+          <p className="text-slate-400">{pathData.description}</p>
+          
+          {/* Stats */}
+          <div className="mt-4 flex gap-6">
+            <div className="flex items-center gap-2 text-slate-400">
+              <BookOpen className="w-5 h-5 text-cyan-400" />
+              <span>{modules.length} módulos</span>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="text-center">
-                <div className="text-3xl text-cyan-400">{path.progress}%</div>
-                <div className="text-xs text-slate-500">COMPLETADO</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Progress bar */}
-          <div className="mt-6">
-            <div className="flex justify-between text-sm mb-2">
-              <span className="text-slate-400">Progreso de la Ruta</span>
-              <span className="text-cyan-400">{path.completedLessons} / {path.totalLessons} lecciones</span>
-            </div>
-            <div className="h-4 bg-slate-900 rounded-full overflow-hidden relative border border-cyan-500/30">
-              <motion.div
-                className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500"
-                initial={{ width: 0 }}
-                animate={{ width: `${path.progress}%` }}
-                transition={{ duration: 1.5, ease: 'easeOut' }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[scan-line_3s_ease-in-out_infinite]" />
+            <div className="flex items-center gap-2 text-slate-400">
+              <Clock className="w-5 h-5 text-purple-400" />
+              <span>~{modules.length * 2}h estimadas</span>
             </div>
           </div>
         </motion.div>
 
-        <NeonDivider color={path.color} className="mb-8" />
+        {/* Loading / Error States */}
+        {loading ? (
+          <div className="py-12 text-center text-slate-400">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              className="inline-block w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full"
+            />
+            <p className="mt-4">Cargando módulos...</p>
+          </div>
+        ) : error ? (
+          <div className="py-12 text-center">
+            <p className="text-red-400 mb-4">Error: {error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-cyan-500/20 border border-cyan-500/50 rounded-lg text-cyan-400 hover:bg-cyan-500/30 transition-colors"
+            >
+              Reintentar
+            </button>
+          </div>
+        ) : modules.length === 0 ? (
+          <div className="py-12 text-center text-slate-400">
+            No hay módulos disponibles en esta ruta
+          </div>
+        ) : (
+          /* Modules Grid */
+          <div className="grid gap-4">
+            {modules.map((module, index) => {
+              const progress = getModuleProgress(module);
+              const isCompleted = progress === 100;
 
-        {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <GlassPanel glow="cyan" animate={false}>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-                <Brain className="w-6 h-6 text-cyan-400" />
-              </div>
-              <div>
-                <div className="text-2xl text-cyan-400">{path.modules.length}</div>
-                <div className="text-sm text-slate-400">Módulos</div>
-              </div>
-            </div>
-          </GlassPanel>
-
-          <GlassPanel glow="purple" animate={false}>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-purple-400" />
-              </div>
-              <div>
-                <div className="text-2xl text-purple-400">{path.estimatedTime}</div>
-                <div className="text-sm text-slate-400">Tiempo Estimado</div>
-              </div>
-            </div>
-          </GlassPanel>
-
-          <GlassPanel glow="teal" animate={false}>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-teal-500/20 flex items-center justify-center">
-                <Award className="w-6 h-6 text-teal-400" />
-              </div>
-              <div>
-                <div className="text-2xl text-teal-400">A+</div>
-                <div className="text-sm text-slate-400">Calificación</div>
-              </div>
-            </div>
-          </GlassPanel>
-        </div>
-
-        {/* Modules List */}
-        <div>
-          <h3 className="text-purple-400 mb-6">Módulos del Programa</h3>
-          
-          <div className="space-y-4">
-            {path.modules.map((module, index) => (
-              <motion.div
-                key={module.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <GlassPanel 
-                  glow={module.completed ? 'cyan' : module.progress > 0 ? 'purple' : 'none'}
-                  animate={false}
-                  className="hover:scale-[1.02] transition-transform"
+              return (
+                <motion.div
+                  key={module.id_modulo}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  onClick={() => handleModuleClick(module.id_modulo)}
+                  className="group relative p-6 rounded-lg border-2 border-cyan-500/30 bg-gradient-to-br from-slate-900/80 to-purple-900/20 backdrop-blur-sm cursor-pointer hover:border-cyan-400 transition-all duration-300 hover:shadow-[0_0_30px_rgba(6,182,212,0.3)]"
                 >
-                  <div className="flex items-start gap-4">
-                    {/* Status icon */}
-                    <div className="mt-1">
-                      {module.completed ? (
-                        <CheckCircle2 className="w-6 h-6 text-cyan-400" />
-                      ) : (
-                        <Circle className={`w-6 h-6 ${module.progress > 0 ? 'text-purple-400' : 'text-slate-600'}`} />
-                      )}
-                    </div>
+                  {/* Module number badge */}
+                  <div className="absolute -left-3 -top-3 w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center text-white font-bold border-2 border-slate-900 shadow-lg">
+                    {module.orden}
+                  </div>
 
-                    {/* Module info */}
+                  {/* Completed badge */}
+                  {isCompleted && (
+                    <div className="absolute -right-2 -top-2">
+                      <CheckCircle className="w-8 h-8 text-green-400 fill-green-400/20" />
+                    </div>
+                  )}
+
+                  <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h4 className={`${module.completed ? 'text-cyan-400' : 'text-slate-200'} mb-1`}>
-                            Módulo {index + 1}: {module.title}
-                          </h4>
-                          <p className="text-slate-400 text-sm mb-3">{module.description}</p>
-                          <div className="flex items-center gap-4 text-xs text-slate-500">
-                            <span>{module.lessonCount} lecciones</span>
-                            <span>•</span>
-                            <span>{module.estimatedTime}</span>
-                          </div>
-                        </div>
-                        <div className="text-right ml-4">
-                          <div className={`text-2xl ${module.completed ? 'text-cyan-400' : 'text-purple-400'} mb-1`}>
-                            {module.progress}%
-                          </div>
-                        </div>
-                      </div>
+                      <h3 className="text-xl font-semibold text-cyan-400 mb-2 group-hover:text-cyan-300 transition-colors">
+                        {module.titulo}
+                      </h3>
+                      <p className="text-slate-400 text-sm mb-4 line-clamp-2">
+                        {module.descripcion}
+                      </p>
 
                       {/* Progress bar */}
-                      {module.progress > 0 && (
-                        <div className="mb-3">
-                          <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full ${module.completed ? 'bg-gradient-to-r from-cyan-400 to-teal-500' : 'bg-gradient-to-r from-purple-400 to-pink-500'}`}
-                              style={{ width: `${module.progress}%` }}
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 max-w-xs">
+                          <div className="h-2 bg-slate-900 rounded-full overflow-hidden border border-cyan-500/30">
+                            <motion.div
+                              className="h-full bg-gradient-to-r from-cyan-400 to-purple-500"
+                              initial={{ width: 0 }}
+                              animate={{ width: `${progress}%` }}
+                              transition={{ duration: 0.8, delay: index * 0.1 }}
                             />
                           </div>
                         </div>
-                      )}
-
-                      {/* Action button */}
-                      <HolographicButton
-                        variant={module.completed ? 'success' : module.progress > 0 ? 'secondary' : 'primary'}
-                        size="sm"
-                        onClick={() => onNavigate('module-map', { moduleId: module.id, pathId })}
-                      >
-                        {module.completed ? 'Revisar Módulo' : module.progress > 0 ? 'Continuar' : 'Comenzar'}
-                        <ChevronRight className="w-4 h-4 inline ml-2" />
-                      </HolographicButton>
+                        <span className="text-sm text-cyan-400 font-semibold min-w-[3rem] text-right">
+                          {progress}%
+                        </span>
+                      </div>
                     </div>
+
+                    {/* Arrow indicator */}
+                    <motion.div
+                      className="text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                      animate={{ x: [0, 5, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <ChevronRight className="w-6 h-6" />
+                    </motion.div>
                   </div>
-                </GlassPanel>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
-        </div>
+        )}
+
+        {/* Instructions */}
+        {!loading && !error && modules.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-8 text-center"
+          >
+            <p className="text-slate-400 text-sm">
+              Haz clic en cualquier módulo para explorar sus lecciones
+            </p>
+          </motion.div>
+        )}
       </div>
     </div>
   );

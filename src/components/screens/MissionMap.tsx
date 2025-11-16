@@ -128,32 +128,36 @@ export function MissionMap({ onNavigate }: MissionMapProps) {
               </radialGradient>
             </defs>
             <rect width="800" height="600" fill="url(#bgGradient)" />
-
-            {/* Learning Path Constellations */}
-            // En MissionMap.tsx, encuentra la parte donde renderizas las rutas:
-
-{(learningPaths ?? []).map((path) => {
-  console.log("🎨 Renderizando ruta:", path.id, path.title);
-  return (
-    <ConstellationCard
-      key={path.id}
-      id={path.id}
-      title={path.title}
-      description={path.description}
-      progress={path.progress}
-      moduleCount={path.moduleCount}
-      color={path.color}
-      position={path.position}
-      stars={path.stars}
-      onClick={() => {
-        console.log("🎯 Click detectado en ruta:", path.id, path.title);
-        console.log("🔄 Llamando onNavigate con:", { pathId: path.id });
-        onNavigate('path-overview', { pathId: path.id });
-      }}
-    />
-  );
-})}
           </svg>
+
+          {/* Render HTML cards encima del SVG usando position absolute */}
+          {(learningPaths ?? []).map((path) => (
+            <div
+              key={path.id}
+              style={{
+                position: 'absolute',
+                left: `${(path.position.x / 800) * 100}%`,
+                top: `${(path.position.y / 600) * 100}%`,
+                transform: 'translate(-50%, -50%)',
+                pointerEvents: 'auto'
+              }}
+            >
+              <ConstellationCard
+                id={path.id}
+                title={path.title}
+                description={path.description}
+                progress={path.progress}
+                moduleCount={path.moduleCount}
+                color={path.color}
+                position={path.position}
+                stars={path.stars}
+                onClick={() => {
+                  console.log("🎯 Click detectado en ruta:", path.id, path.title);
+                  onNavigate('path-overview', { pathId: path.id });
+                }}
+              />
+            </div>
+          ))}
         </div>
 
         {/* Legend */}

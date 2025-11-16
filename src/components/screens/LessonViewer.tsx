@@ -1,32 +1,79 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { GlassPanel } from '../ui-sci-fi/GlassPanel';
 import { HolographicButton } from '../ui-sci-fi/HolographicButton';
 import { NeonDivider } from '../ui-sci-fi/NeonDivider';
 import { Type, Contrast, Volume2, Download, Bot } from 'lucide-react';
 
-export function LessonViewer() {
+interface Lesson {
+  id: string;
+  title: string;
+  content: string; // texto con saltos de línea para párrafos
+  progress?: number; // porcentaje 0-100
+}
+
+interface LessonViewerProps {
+  lessonId?: string;
+}
+
+export function LessonViewer({ lessonId = '1' }: LessonViewerProps) {
   const [textSize, setTextSize] = useState(1);
   const [highContrast, setHighContrast] = useState(false);
+  const [lesson, setLesson] = useState<Lesson | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const ac = new AbortController();
+    async function loadLesson() {
+      setLoading(true);
+      setError(null);
+      try {
+        const baseUrl = 'https://digieduhackpue-backend.onrender.com';
+        const res = await fetch(`${baseUrl}/lessons/${lessonId}`, { signal: ac.signal });
+        if (!res.ok) {
+          throw new Error(`Error ${res.status}`);
+        }
+        const response = await res.json();
+        // El backend devuelve { success, data: { id_leccion, titulo, contenido, ... } }
+        if (response.success && response.data) {
+          // Mapear los nombres de campos del backend a los que espera el frontend
+          setLesson({
+            id: response.data.id_leccion.toString(),
+            title: response.data.titulo,
+            content: response.data.contenido || '',
+            progress: response.data.progress
+          });
+        } else {
+          throw new Error(response.error || 'Error al cargar la lección');
+        }
+      } catch (err: any) {
+        if (err.name !== 'AbortError') setError(err.message || 'Error al cargar la lección');
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadLesson();
+    return () => ac.abort();
+  }, [lessonId]);
+
   const handleTextToSpeech = () => {
-  const utterance = new window.SpeechSynthesisUtterance(
-    'Neural networks are computing systems inspired by the biological neural networks...'
-  );
+    const text = lesson?.content ?? 'Neural networks are computing systems inspired by the biological neural networks...';
+    const utterance = new window.SpeechSynthesisUtterance(text);
 
-  // Elegir la voz (ejemplo: Google US English)
-  const voices = window.speechSynthesis.getVoices();
-  const selectedVoice = voices.find(voice => voice.name === 'Google US English');
-  if (selectedVoice) {
-    utterance.voice = selectedVoice;
-  }
+    const voices = window.speechSynthesis.getVoices();
+    const selectedVoice = voices.find(voice => voice.name === 'Google US English');
+    if (selectedVoice) utterance.voice = selectedVoice;
 
-  // Ajustar velocidad y pitch para que suene más natural
-  utterance.rate = 1.0; // velocidad (0.1 a 10, 1 = normal)
-  utterance.pitch = 1.2; // tono (0 a 2, 1 = normal)
-  utterance.volume = 1; // volumen (0 a 1)
+    utterance.rate = 1.0;
+    utterance.pitch = 1.2;
+    utterance.volume = 1;
 
-  window.speechSynthesis.speak(utterance);
-};
+    window.speechSynthesis.cancel(); // cancelar lecturas previas
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const progressDisplay = lesson?.progress ?? 67;
 
   return (
     <div className="min-h-screen p-8">
@@ -36,7 +83,7 @@ export function LessonViewer() {
           <GlassPanel glow="cyan" className="h-full">
             {/* Accessibility Controls */}
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-cyan-500/30">
-              <h3 className="text-cyan-400">Neural Networks: Introduction</h3>
+              <h3 className="text-cyan-400">{lesson?.title ?? 'Neural Networks: Introduction'}</h3>
               <div className="flex gap-2">
                 <button
                   onClick={() => setTextSize(Math.min(textSize + 0.1, 1.5))}
@@ -74,50 +121,69 @@ export function LessonViewer() {
               className={`space-y-4 ${highContrast ? 'bg-black/50 p-6 rounded' : ''}`}
               style={{ fontSize: `${textSize}rem` }}
             >
-              <h4 className={highContrast ? 'text-white' : 'text-slate-200'}>
-                What are Neural Networks?
-              </h4>
-              <p className={highContrast ? 'text-white' : 'text-slate-300'}>
-                Neural networks are computing systems inspired by the biological neural networks that constitute animal brains. 
-                An artificial neural network is based on a collection of connected units or nodes called artificial neurons, 
-                which loosely model the neurons in a biological brain.
-              </p>
+              {loading && <p className="text-slate-400">Cargando lección...</p>}
+              {error && <p className="text-red-400">Error: {error}</p>}
 
-              <NeonDivider color="cyan" className="my-6" />
+              {!loading && !error && (
+                <>
+                  {lesson ? (
+                    <>
+                      {lesson.content.split(/\n{2,}/).map((para, i) => (
+                        <p key={i} className={highContrast ? 'text-white' : 'text-slate-300'}>
+                          {para}
+                        </p>
+                      ))}
+                    </>
+                  ) : (
+                    <>
+                      <h4 className={highContrast ? 'text-white' : 'text-slate-200'}>
+                        What are Neural Networks?
+                      </h4>
+                      <p className={highContrast ? 'text-white' : 'text-slate-300'}>
+                        Neural networks are computing systems inspired by the biological neural networks that constitute animal brains. 
+                        An artificial neural network is based on a collection of connected units or nodes called artificial neurons, 
+                        which loosely model the neurons in a biological brain.
+                      </p>
 
-              <h4 className={highContrast ? 'text-white' : 'text-slate-200'}>
-                Key Components
-              </h4>
-              <ul className={`list-disc list-inside space-y-2 ${highContrast ? 'text-white' : 'text-slate-300'}`}>
-                <li>Input Layer: Receives the initial data</li>
-                <li>Hidden Layers: Process information through weighted connections</li>
-                <li>Output Layer: Produces the final result</li>
-                <li>Activation Functions: Determine neuron firing patterns</li>
-              </ul>
+                      <NeonDivider color="cyan" className="my-6" />
 
-              <NeonDivider color="purple" className="my-6" />
+                      <h4 className={highContrast ? 'text-white' : 'text-slate-200'}>
+                        Key Components
+                      </h4>
+                      <ul className={`list-disc list-inside space-y-2 ${highContrast ? 'text-white' : 'text-slate-300'}`}>
+                        <li>Input Layer: Receives the initial data</li>
+                        <li>Hidden Layers: Process information through weighted connections</li>
+                        <li>Output Layer: Produces the final result</li>
+                        <li>Activation Functions: Determine neuron firing patterns</li>
+                      </ul>
 
-              <h4 className={highContrast ? 'text-white' : 'text-slate-200'}>
-                Applications
-              </h4>
-              <p className={highContrast ? 'text-white' : 'text-slate-300'}>
-                Neural networks power modern AI applications including image recognition, natural language processing, 
-                autonomous vehicles, medical diagnosis, and financial forecasting. Their ability to learn complex patterns 
-                from data makes them invaluable in solving real-world problems.
-              </p>
+                      <NeonDivider color="purple" className="my-6" />
+
+                      <h4 className={highContrast ? 'text-white' : 'text-slate-200'}>
+                        Applications
+                      </h4>
+                      <p className={highContrast ? 'text-white' : 'text-slate-300'}>
+                        Neural networks power modern AI applications including image recognition, natural language processing, 
+                        autonomous vehicles, medical diagnosis, and financial forecasting. Their ability to learn complex patterns 
+                        from data makes them invaluable in solving real-world problems.
+                      </p>
+                    </>
+                  )}
+                </>
+              )}
             </div>
 
             {/* Progress Bar */}
             <div className="mt-8 pt-6 border-t border-cyan-500/30">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-slate-400">Lesson Progress</span>
-                <span className="text-sm text-cyan-400">67%</span>
+                <span className="text-sm text-cyan-400">{progressDisplay}%</span>
               </div>
               <div className="h-3 bg-slate-900 rounded-full overflow-hidden relative">
                 <motion.div
                   className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500"
                   initial={{ width: 0 }}
-                  animate={{ width: '67%' }}
+                  animate={{ width: `${progressDisplay}%` }}
                   transition={{ duration: 1 }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[scan-line_2s_ease-in-out_infinite]" />

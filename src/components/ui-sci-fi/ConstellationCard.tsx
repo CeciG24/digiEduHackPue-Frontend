@@ -123,7 +123,6 @@ export function ConstellationCard({
       ))}
 
       {/* Center label area */}
-      // Versión alternativa con click en foreignObject también
 <foreignObject
   x={position.x - 80}
   y={position.y - 100}
@@ -134,7 +133,7 @@ export function ConstellationCard({
     console.log("🖱️ Click en foreignObject");
     onClick();
   }}
-  style={{ cursor: 'pointer' }} // ✅ Cambio: permitir clicks
+  style={{ cursor: 'pointer',pointerEvents: 'auto' }} // ✅ Cambio: permitir clicks
 >
   <div 
     className="flex flex-col items-center"

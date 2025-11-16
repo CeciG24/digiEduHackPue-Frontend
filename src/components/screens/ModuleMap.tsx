@@ -1,4 +1,3 @@
-// ...existing code...
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { ModulePlanetCard } from '../ui-sci-fi/ModulePlanetCard';
@@ -34,30 +33,50 @@ export function ModuleMap({ moduleId, pathId, onNavigate, onBack }: ModuleMapPro
   useEffect(() => {
     const ac = new AbortController();
 
-    async function fetchModule() {
+    async function fetchModuleAndLessons() {
       try {
         setLoading(true);
         setError(null);
 
-        // Ajusta este endpoint según tu backend
-        const url = 'http://localhost:5000' + `/modulos/${moduleId}`;
-        const res = await fetch(url, { signal: ac.signal });
+        const baseUrl = 'https://digieduhackpue-backend.onrender.com';
 
-        if (!res.ok) {
-          throw new Error(`Error ${res.status} al obtener el módulo`);
+        // 1. Obtener datos del módulo
+        const moduleRes = await fetch(`${baseUrl}/modulos/${moduleId}`, { signal: ac.signal });
+        if (!moduleRes.ok) {
+          throw new Error(`Error ${moduleRes.status} al obtener el módulo`);
         }
+        const moduleData = await moduleRes.json();
+        console.log('Module fetch response:', moduleData);
 
-        const data = await res.json();
-
-        // Soporta respuesta { module: {...}, lessons: [...] } o { title, description, progress, lessons }
-        const md = data.module ?? {
-          title: data.title ?? '',
-          description: data.description ?? '',
-          progress: data.progress ?? 0
+        // Extraer información del módulo
+        const md = {
+          title: moduleData.titulo ?? moduleData.title ?? '',
+          description: moduleData.descripcion ?? moduleData.description ?? '',
+          progress: moduleData.progreso ?? moduleData.progress ?? 0
         };
-
         setModuleData(md);
-        setLessons(Array.isArray(data.lessons) ? data.lessons : []);
+
+        // 2. Obtener lecciones del módulo
+        const lessonsRes = await fetch(`${baseUrl}/lessons/modulo/${moduleId}`, { signal: ac.signal });
+        if (!lessonsRes.ok) {
+          throw new Error(`Error ${lessonsRes.status} al obtener las lecciones`);
+        }
+        const lessonsData = await lessonsRes.json();
+        console.log('Lessons fetch response:', lessonsData);
+
+        // Procesar lecciones según la estructura de tu API
+        const rawLessons = lessonsData.success && Array.isArray(lessonsData.data) 
+          ? lessonsData.data 
+          : [];
+
+        const processed = rawLessons.map((l: any, i: number) => ({
+          id: l.id_leccion?.toString() ?? l.id ?? `lesson-${i}`,
+          title: l.titulo ?? l.title ?? `Lección ${i + 1}`,
+          completed: !!(l.completada ?? l.completed ?? false),
+          angle: Math.round((360 * i) / Math.max(1, rawLessons.length))
+        }));
+
+        setLessons(processed);
       } catch (e: any) {
         if (e.name === 'AbortError') return;
         setError(e.message ?? 'Error al cargar el módulo');
@@ -66,15 +85,16 @@ export function ModuleMap({ moduleId, pathId, onNavigate, onBack }: ModuleMapPro
       }
     }
 
-    fetchModule();
+    fetchModuleAndLessons();
     return () => ac.abort();
   }, [moduleId, pathId]);
 
   const handleLessonClick = (lessonId: string) => {
-    // Randomly decide between lesson viewer and assessment
-    const screens = ['lesson', 'assessment'];
-    const randomScreen = screens[Math.floor(Math.random() * screens.length)];
-    onNavigate(randomScreen, { lessonId, moduleId, pathId });
+    onNavigate('lesson', { lessonId, moduleId, pathId });
+  };
+
+  const handleModuleClick = () => {
+    onNavigate('moduleOverview', { moduleId, pathId });
   };
 
   return (
@@ -158,8 +178,32 @@ export function ModuleMap({ moduleId, pathId, onNavigate, onBack }: ModuleMapPro
                 position={{ x: 400, y: 350 }}
                 lessons={lessons}
                 onLessonClick={handleLessonClick}
+                onSatelliteClick={handleLessonClick}
+                onPlanetClick={handleModuleClick}
+                onClick={handleModuleClick}
               />
             </svg>
+          </div>
+        )}
+
+        {/* Debug / fallback list of lessons to verify handlers */}
+        {!loading && !error && (
+          <div className="mt-6 text-center">
+            {lessons.length === 0 ? (
+              <p className="text-red-400">No se encontraron lecciones en el módulo. Revisa la respuesta del backend (ver consola).</p>
+            ) : (
+              <div className="flex flex-wrap gap-2 justify-center">
+                {lessons.map((l) => (
+                  <button
+                    key={l.id}
+                    className="px-3 py-1 rounded bg-slate-800 text-slate-200 hover:bg-cyan-600"
+                    onClick={() => handleLessonClick(l.id)}
+                  >
+                    {l.title} {l.completed ? '(✓)' : ''}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
