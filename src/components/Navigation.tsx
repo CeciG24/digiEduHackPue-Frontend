@@ -99,16 +99,19 @@ export function Navigation({ currentScreen, onNavigate }: NavigationProps) {
         {/* Logout and User Info - Fixed at bottom */}
         <div className="mt-auto flex flex-col items-center gap-3 mb-6">
           {user && (
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-400 to-pink-600 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.6)] group relative">
+            <button
+              className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-400 to-pink-600 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.6)] group relative focus:outline-none"
+              onClick={() => onNavigate('user-profile')}
+              title="Ver perfil"
+            >
               <span className="font-bold text-white text-xs">
-                {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                {user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
               </span>
-              
               {/* User tooltip */}
               <div className="absolute left-16 px-3 py-2 bg-slate-900 border border-cyan-400/50 rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
                 <span className="text-sm text-cyan-400">{user.name}</span>
               </div>
-            </div>
+            </button>
           )}
 
           <motion.button

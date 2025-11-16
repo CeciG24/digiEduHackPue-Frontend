@@ -26,7 +26,14 @@ export function WelcomeConsole({ onNavigate }: WelcomeConsoleProps) {
             <h2 className="text-purple-400">Mission Control</h2>
             <div className="h-px w-20 bg-gradient-to-l from-transparent to-cyan-400" />
           </div>
-          <p className="text-slate-400 mt-4">Initialize your learning trajectory</p>
+          <p className="text-slate-400 mt-4"><br />La humanidad enfrenta un punto crítico.
+La desinformación, la falta de acceso y el olvido del conocimiento han comenzado a erosionar lo que somos.
+Para evitar que nuestro futuro se desvanezca, nace una iniciativa secreta: El Archivo.
+
+Tú has sido seleccionado para formar parte de la última generación capaz de restaurar lo que se está perdiendo.
+Cada ruta de aprendizaje es un fragmento clave, cada módulo una pieza vital del rompecabezas.
+Dominar estas lecciones no es un logro académico… es una misión de supervivencia.</p>
+          <br />
         </motion.div>
 
         {/* Floating panels */}

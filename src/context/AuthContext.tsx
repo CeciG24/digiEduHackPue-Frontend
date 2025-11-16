@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { registerUser, loginUser } from '../api/auth';
 
 interface User {
   id: string;
@@ -10,7 +11,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (email: string, password: string, name: string, rol: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -42,47 +43,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string) => {
-    // Simular delay de API
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Verificar credenciales (en producción sería una llamada a API)
-    const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-    const foundUser = storedUsers.find((u: any) => u.email === email && u.password === password);
-
-    if (!foundUser) {
-      throw new Error('Email o contraseña incorrectos');
-    }
-
-    const userData = { id: foundUser.id, email: foundUser.email, name: foundUser.name };
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+    // Llamar al backend para login
+    const data = await loginUser({ email, contraseña: password });
+    // data.token contiene el JWT
+    localStorage.setItem('token', data.token);
+    // Decodificar el token para obtener info del usuario (opcional)
+    // Aquí solo guardamos el email, puedes guardar más si lo necesitas
+    setUser({ id: '', email, name: '' });
+    localStorage.setItem('user', JSON.stringify({ id: '', email, name: '' }));
   };
 
-  const register = async (email: string, password: string, name: string) => {
-    // Simular delay de API
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Verificar si el usuario ya existe
-    const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-    if (storedUsers.some((u: any) => u.email === email)) {
-      throw new Error('El email ya está registrado');
-    }
-
-    // Crear nuevo usuario
-    const newUser = {
-      id: Date.now().toString(),
-      email,
-      password, // En producción, esto estaría hasheado
-      name,
-    };
-
-    storedUsers.push(newUser);
-    localStorage.setItem('users', JSON.stringify(storedUsers));
-
-    // Auto login después del registro
-    const userData = { id: newUser.id, email: newUser.email, name: newUser.name };
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+  const register = async (email: string, password: string, name: string, rol: string) => {
+    // Llamar al backend para registrar usuario
+    const data = await registerUser({ nombre: name, email, contraseña: password, rol });
+    // Puedes guardar el usuario en el estado si el backend lo retorna
+    // Aquí solo guardamos el email y nombre por ejemplo
+    setUser({ id: '', email, name });
+    localStorage.setItem('user', JSON.stringify({ id: '', email, name }));
   };
 
   const logout = () => {

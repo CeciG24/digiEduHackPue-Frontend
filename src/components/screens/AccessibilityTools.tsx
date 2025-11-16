@@ -15,11 +15,21 @@ export function AccessibilityTools() {
     darkMode: true
   });
 
-  // ...existing code...
   const toggleSetting = (key: keyof typeof settings) => {
     setSettings(prev => {
       const updated = { ...prev, [key]: !prev[key] };
       localStorage.setItem("accessibility-settings", JSON.stringify(updated));
+
+      // Aplicar la clase de fuente para dislexia inmediatamente para que el toggle tenga efecto instantáneo
+      if (typeof window !== 'undefined' && key === 'dyslexiaFont') {
+        const body = document.body;
+        if (updated.dyslexiaFont) {
+          body.classList.add('dyslexia-font');
+        } else {
+          body.classList.remove('dyslexia-font');
+        }
+      }
+
       return updated;
     });
   };
@@ -38,7 +48,8 @@ export function AccessibilityTools() {
   }, []);
 
   useEffect(() => {
-    const body = document.querySelector("body");
+    if (typeof window === 'undefined') return;
+    const body = document.body;
     if (!body) return;
 
     if (settings.dyslexiaFont) {
@@ -46,8 +57,6 @@ export function AccessibilityTools() {
     } else {
       body.classList.remove("dyslexia-font");
     }
-
-    console.log("CLASE APLICADA:", settings.dyslexiaFont); // <-- debugeo
   }, [settings.dyslexiaFont]);
 
   return (
@@ -109,6 +118,8 @@ export function AccessibilityTools() {
                   </p>
                   <button
                     onClick={() => toggleSetting('dyslexiaFont')}
+                    aria-pressed={settings.dyslexiaFont}
+                    title="Toggle dyslexia-friendly font"
                     className={`
                       w-12 h-6 rounded-full transition-colors relative
                       ${settings.dyslexiaFont ? 'bg-purple-500' : 'bg-slate-600'}

@@ -1,16 +1,10 @@
 @import "tailwindcss";
-@font-face {
-  font-family: 'OpenDyslexic';
-  src: url('https://cdn.jsdelivr.net/gh/antijingoist/open-dyslexic/compiled/OpenDyslexic-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
+@import url('https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;500;600;700&display=swap');
 
-/* Aplicar fuente cuando body tenga la clase dyslexia-font */
+/* Aplicar fuente Lexend cuando body tenga la clase dyslexia-font */
 body.dyslexia-font,
 body.dyslexia-font * {
-  font-family: 'OpenDyslexic', sans-serif !important;
+  font-family: 'Lexend Deca', 'Lexend', sans-serif !important;
 }
 
 @font-face {

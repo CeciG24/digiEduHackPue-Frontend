@@ -17,6 +17,7 @@ export const Register = ({ onNavigate, onSwitchToLogin }: RegisterProps) => {
     email: '',
     password: '',
     confirmPassword: '',
+    rol: 'alumno', // valor por defecto
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -43,6 +44,10 @@ export const Register = ({ onNavigate, onSwitchToLogin }: RegisterProps) => {
       setError('Las contraseñas no coinciden');
       return false;
     }
+    if (!formData.rol) {
+      setError('Selecciona un rol');
+      return false;
+    }
     return true;
   };
 
@@ -57,7 +62,7 @@ export const Register = ({ onNavigate, onSwitchToLogin }: RegisterProps) => {
     setIsLoading(true);
 
     try {
-      await register(formData.email, formData.password, formData.name);
+      await register(formData.email, formData.password, formData.name, formData.rol);
       if (onNavigate) {
         onNavigate('welcome');
       }
@@ -139,6 +144,21 @@ export const Register = ({ onNavigate, onSwitchToLogin }: RegisterProps) => {
                 disabled={isLoading}
                 className="bg-slate-800/50 border-slate-700 text-white placeholder-slate-500"
               />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-300">Rol</label>
+              <select
+                name="rol"
+                value={formData.rol}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="bg-slate-800/50 border-slate-700 text-white rounded px-3 py-2 w-full"
+              >
+                <option value="alumno">Alumno</option>
+                <option value="maestro">Maestro</option>
+                
+              </select>
             </div>
 
             <Button
