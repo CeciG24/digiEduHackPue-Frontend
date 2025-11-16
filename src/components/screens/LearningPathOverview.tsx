@@ -85,8 +85,8 @@ export function LearningPathOverview({ pathId, onNavigate, onBack }: PathOvervie
   };
 
   return (
-    <div className="min-h-screen flex items-start justify-center p-4 sm:p-6 md:p-8">
-      <div className="w-full max-w-5xl px-4 sm:px-6 md:px-8">
+    <div className="min-h-screen flex items-start justify-center  p-4 sm:p-6 md:p-8">
+      <div className=" max-w-5xl px-4 sm:px-6 md:px-8">
         {/* Back button */}
         <motion.button
           onClick={onBack}
@@ -159,10 +159,7 @@ export function LearningPathOverview({ pathId, onNavigate, onBack }: PathOvervie
                   onClick={() => handleModuleClick(module.id_modulo)}
                   className="group relative p-6 rounded-lg border-2 border-cyan-500/30 bg-gradient-to-br from-slate-900/80 to-purple-900/20 backdrop-blur-sm cursor-pointer hover:border-cyan-400 transition-all duration-300 hover:shadow-[0_0_30px_rgba(6,182,212,0.3)]"
                 >
-                  {/* Module number badge */}
-                  <div className="absolute -left-3 -top-3 w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center text-white font-bold border-2 border-slate-900 shadow-lg">
-                    {module.orden}
-                  </div>
+                  
 
                   {/* Completed badge */}
                   {isCompleted && (

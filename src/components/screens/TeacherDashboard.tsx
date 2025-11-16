@@ -97,8 +97,8 @@ export function TeacherDashboard({ onNavigate }: TeacherDashboardProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8">
-      <div className="max-w-[1800px] w-full">
+    <div className="min-h-screen flex items-start justify-center  p-4 sm:p-6 md:p-8">
+      <div className=" pr-8 md:pr-16 lg:pr-32">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
