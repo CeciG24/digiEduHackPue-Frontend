@@ -76,10 +76,10 @@ export function LessonViewer({ lessonId = '1' }: LessonViewerProps) {
   const progressDisplay = lesson?.progress ?? 67;
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-6">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
+      <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-6 p-2 sm:p-4 md:p-6">
         {/* Main Content Panel */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 p-2 sm:p-4">
           <GlassPanel glow="cyan" className="h-full">
             {/* Accessibility Controls */}
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-cyan-500/30">
@@ -193,7 +193,7 @@ export function LessonViewer({ lessonId = '1' }: LessonViewerProps) {
         </div>
 
         {/* AI Assistant Panel */}
-        <div className="space-y-6">
+        <div className="space-y-6 p-2 sm:p-4">
           {/* AI Avatar */}
           <GlassPanel glow="purple">
             <div className="text-center">

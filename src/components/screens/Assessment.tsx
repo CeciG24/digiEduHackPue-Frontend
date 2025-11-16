@@ -59,16 +59,16 @@ export function Assessment() {
   const isCorrect = selectedAnswer === questions[currentQuestion].correctAnswer;
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
+      <div className="w-full max-w-4xl px-4 sm:px-6 md:px-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 p-4 sm:p-6">
           <h2 className="text-cyan-400 mb-2">Simulation Training</h2>
           <p className="text-slate-400">Test your knowledge and skills</p>
         </div>
 
         {/* Progress Reactor */}
-        <div className="flex items-center justify-center mb-8">
+        <div className="flex items-center justify-center mb-8 p-2 sm:p-4">
           <div className="relative w-40 h-40">
             <svg className="transform -rotate-90 w-40 h-40">
               <circle
@@ -108,7 +108,7 @@ export function Assessment() {
         </div>
 
         {/* Question Panel */}
-        <GlassPanel glow="cyan" className="mb-6">
+        <GlassPanel glow="cyan" className="mb-6 p-4 sm:p-6 md:p-8">
           <h3 className="text-slate-200 mb-6">
             {questions[currentQuestion].question}
           </h3>
@@ -206,7 +206,7 @@ export function Assessment() {
         </GlassPanel>
 
         {/* Action Buttons */}
-        <div className="flex gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center p-4 sm:p-6">
           {showFeedback && currentQuestion < questions.length - 1 && (
             <HolographicButton variant="primary" onClick={nextQuestion}>
               Next Question

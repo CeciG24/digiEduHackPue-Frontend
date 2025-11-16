@@ -85,8 +85,8 @@ export function LearningPathOverview({ pathId, onNavigate, onBack }: PathOvervie
   };
 
   return (
-    <div className="min-h-screen p-8 pl-24 md:pl-72">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen flex items-start justify-center p-4 sm:p-6 md:p-8">
+      <div className="w-full max-w-5xl px-4 sm:px-6 md:px-8">
         {/* Back button */}
         <motion.button
           onClick={onBack}

@@ -5,10 +5,10 @@ import { Brain, TrendingUp, Target, BookOpen, Zap } from 'lucide-react';
 
 export function AICore() {
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
+      <div className="w-full max-w-7xl px-4 sm:px-6 md:px-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 p-4 sm:p-6">
           <div className="flex items-center gap-4 mb-2">
             <Brain className="w-10 h-10 text-purple-400" />
             <h2 className="text-purple-400">AI Core — Adaptive Insights</h2>
@@ -16,10 +16,9 @@ export function AICore() {
           <p className="text-slate-400">Personalized learning analytics powered by artificial intelligence</p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid lg:grid-cols-2 gap-6 mb-6 p-2 sm:p-4">
           {/* Performance Overview */}
-          <GlassPanel glow="cyan">
-            <h3 className="text-cyan-400 mb-6">Performance Analysis</h3>
+          <GlassPanel glow="cyan" className="p-4 sm:p-6">
             
             {/* HUD Ring Chart */}
             <div className="flex items-center justify-center mb-6">
@@ -131,7 +130,7 @@ export function AICore() {
         </div>
 
         {/* AI Recommendations */}
-        <GlassPanel glow="teal" className="mb-6">
+        <GlassPanel glow="teal" className="mb-6 p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-6">
             <Zap className="w-6 h-6 text-teal-400" />
             <h3 className="text-teal-400">AI Recommendations</h3>
@@ -176,8 +175,8 @@ export function AICore() {
         </GlassPanel>
 
         {/* Study Patterns */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <GlassPanel glow="magenta">
+        <div className="grid md:grid-cols-2 gap-6 p-2 sm:p-4">
+          <GlassPanel glow="magenta" className="p-4 sm:p-6">
             <h3 className="text-pink-400 mb-6">Study Patterns</h3>
             
             <div className="space-y-4">
@@ -200,7 +199,7 @@ export function AICore() {
             </div>
           </GlassPanel>
 
-          <GlassPanel glow="cyan">
+          <GlassPanel glow="cyan" className="p-4 sm:p-6">
             <h3 className="text-cyan-400 mb-6">Achievement Unlocked</h3>
             
             <div className="grid grid-cols-2 gap-4">

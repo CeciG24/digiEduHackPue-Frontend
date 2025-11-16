@@ -75,32 +75,32 @@ export function MissionMap({ onNavigate }: MissionMapProps) {
   }, []);
 
   return (
-    <div className="min-h-screen p-8 pl-24 md:pl-72">
+    <div className="min-h-screen flex items-start md:items-center justify-center bg-transparent p-4 sm:p-6 md:p-8">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="max-w-6xl mx-auto"
+        className="w-full max-w-3xl md:max-w-6xl mx-auto px-4 sm:px-6 md:px-8"
       >
         {/* Header */}
-        <div className="mb-8 flex items-start justify-between">
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-cyan-400 mb-2">Mapa de Rutas de Aprendizaje</h2>
             <p className="text-slate-400">Selecciona una constelación para explorar sus módulos</p>
           </div>
           
           {/* Search */}
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <input
               type="text"
               placeholder="Buscar ruta..."
-              className="w-64 px-4 py-2 pl-10 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_20px_rgba(6,182,212,0.3)]"
+              className="w-full sm:w-64 px-4 py-2 pl-10 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_20px_rgba(6,182,212,0.3)]"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
           </div>
         </div>
 
         {/* Map Container */}
-        <div className="relative rounded-lg border-2 border-cyan-500/30 bg-gradient-to-br from-slate-900/50 to-purple-900/20 backdrop-blur-sm overflow-hidden">
+        <div className="relative rounded-lg border-2 border-cyan-500/30 bg-gradient-to-br from-slate-900/50 to-purple-900/20 backdrop-blur-sm overflow-hidden h-[45vh] sm:h-[55vh] md:h-[70vh] lg:h-[75vh]">
           {/* Grid overlay */}
           <div className="absolute inset-0 opacity-10">
             <div className="w-full h-full" style={{
@@ -119,7 +119,7 @@ export function MissionMap({ onNavigate }: MissionMapProps) {
           </div>
 
           {/* SVG Map */}
-          <svg className="w-full" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
+          <svg className="w-full h-full" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
             {/* Background gradient */}
             <defs>
               <radialGradient id="bgGradient">

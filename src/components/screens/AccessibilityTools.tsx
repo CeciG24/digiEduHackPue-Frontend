@@ -51,19 +51,19 @@ export function AccessibilityTools() {
   }, [settings.dyslexiaFont]);
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
+      <div className="w-full max-w-6xl px-4 sm:px-6 md:px-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 p-4 sm:p-6">
           <h2 className="text-cyan-400 mb-2">Accessibility & Offline Tools</h2>
           <p className="text-slate-400">Customize your learning experience for maximum comfort and accessibility</p>
         </div>
 
         {/* Accessibility Settings */}
-        <div className="mb-8">
+        <div className="mb-8 p-4 sm:p-6">
           <h3 className="text-purple-400 mb-6">Accessibility Settings</h3>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* High Contrast */}
             <GlassPanel glow={settings.highContrast ? 'cyan' : 'none'} animate={false}>
               <div className="flex items-start gap-4">
@@ -253,10 +253,10 @@ export function AccessibilityTools() {
         <NeonDivider color="cyan" className="my-8" />
 
         {/* Offline Downloads */}
-        <div>
+        <div className="p-4 sm:p-6">
           <h3 className="text-teal-400 mb-6">Offline Content</h3>
           
-          <GlassPanel glow="teal">
+          <GlassPanel glow="teal" className="p-4 sm:p-6">
             <div className="mb-6">
               <p className="text-slate-300">
                 Download modules for offline access. Perfect for learning on the go without internet connectivity.
