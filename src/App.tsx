@@ -11,6 +11,7 @@ import { AICore } from './components/screens/AICore';
 import { AccessibilityTools } from './components/screens/AccessibilityTools';
 import { Login } from './components/screens/Login';
 import { Register } from './components/screens/Register';
+import UserProfile from './components/screens/UserProfile';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 interface NavigationData {
@@ -78,41 +79,35 @@ const handleNavigate = (screen: string, data?: NavigationData) => {
     switch (currentScreen) {
       case 'welcome':
         return <WelcomeConsole onNavigate={handleNavigate} />;
-      
       case 'map':
         return <MissionMap onNavigate={handleNavigate} />;
-      
       case 'path-overview':
         return (
           <LearningPathOverview 
-            pathId={navigationData.pathId || '1'} // ✅ Usa el ID real de la ruta
-            onNavigate={handleNavigate}
-            onBack={handleBack}
-          />
-        );
-      
-      case 'module-map':
-        return (
-          <ModuleMap
-            moduleId={navigationData.moduleId || '1'} // ✅ Usa el ID real del módulo
             pathId={navigationData.pathId || '1'}
             onNavigate={handleNavigate}
             onBack={handleBack}
           />
         );
-      
+      case 'module-map':
+        return (
+          <ModuleMap
+            moduleId={navigationData.moduleId || '1'}
+            pathId={navigationData.pathId || '1'}
+            onNavigate={handleNavigate}
+            onBack={handleBack}
+          />
+        );
       case 'lesson':
         return <LessonViewer />;
-      
       case 'assessment':
         return <Assessment />;
-      
       case 'ai-core':
         return <AICore />;
-      
       case 'accessibility':
         return <AccessibilityTools />;
-      
+      case 'user-profile':
+        return <UserProfile />;
       default:
         return <WelcomeConsole onNavigate={handleNavigate} />;
     }
