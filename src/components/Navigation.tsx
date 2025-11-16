@@ -12,7 +12,7 @@ export function Navigation({ currentScreen, onNavigate }: NavigationProps) {
 
   const handleLogout = () => {
     logout();
-    window.location.reload(); // Reload to reset to login screen
+    window.location.reload();
   };
 
   const navItems = [
@@ -32,6 +32,19 @@ export function Navigation({ currentScreen, onNavigate }: NavigationProps) {
 
   const activeNavId = getActiveNavId(currentScreen);
 
+  // ✅ NUEVO: Maneja clicks en navegación sin resetear el contexto
+  const handleNavClick = (navId: string) => {
+    console.log("🧭 Navigation click:", navId, "desde:", currentScreen);
+    
+    // Si estás en path-overview o module-map y haces click en 'map',
+    // vuelve al mapa principal
+    if (navId === 'map' && (currentScreen === 'path-overview' || currentScreen === 'module-map')) {
+      onNavigate('map');
+    } else {
+      onNavigate(navId);
+    }
+  };
+
   return (
     <nav className="fixed left-0 top-0 h-screen w-20 backdrop-blur-xl bg-slate-950/80 border-r border-cyan-500/30 z-40">
       <div className="flex flex-col items-center py-6 gap-6 h-full">
@@ -49,7 +62,10 @@ export function Navigation({ currentScreen, onNavigate }: NavigationProps) {
             return (
               <motion.button
                 key={item.id}
-                onClick={() => onNavigate(item.id)}
+                onClick={(e) => {
+                  e.stopPropagation(); // ✅ Prevenir propagación
+                  handleNavClick(item.id);
+                }}
                 className={`
                   relative w-12 h-12 rounded-lg flex items-center justify-center
                   transition-all duration-300 group

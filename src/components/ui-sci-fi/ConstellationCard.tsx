@@ -1,5 +1,4 @@
 import { motion } from 'motion/react';
-import { ChevronRight } from 'lucide-react';
 
 interface ConstellationCardProps {
   id: string;
@@ -14,6 +13,7 @@ interface ConstellationCardProps {
 }
 
 export function ConstellationCard({ 
+  id,
   title, 
   description, 
   progress, 
@@ -56,15 +56,30 @@ export function ConstellationCard({
 
   const variant = colorVariants[color];
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log("🖱️ ConstellationCard onClick:", id, title);
+    onClick();
+  };
+
   return (
     <motion.g
-      className="cursor-pointer"
-      onClick={onClick}
+      className="cursor-pointer constellation-group"
+      onClick={handleClick}
       whileHover={{ scale: 1.05 }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
+      {/* Invisible clickable area - MUST BE FIRST */}
+      <circle
+        cx={position.x}
+        cy={position.y}
+        r="100"
+        fill="transparent"
+        style={{ cursor: 'pointer' }}
+      />
+
       {/* Constellation lines */}
       {stars.map((star, index) => {
         if (index < stars.length - 1) {
@@ -78,6 +93,7 @@ export function ConstellationCard({
               stroke={variant.line}
               strokeWidth="2"
               opacity="0.6"
+              style={{ pointerEvents: 'none' }}
             />
           );
         }
@@ -86,7 +102,7 @@ export function ConstellationCard({
 
       {/* Constellation stars */}
       {stars.map((star, index) => (
-        <g key={`star-${index}`}>
+        <g key={`star-${index}`} style={{ pointerEvents: 'none' }}>
           <circle
             cx={position.x + star.x}
             cy={position.y + star.y}
@@ -107,33 +123,37 @@ export function ConstellationCard({
       ))}
 
       {/* Center label area */}
-      <foreignObject
-        x={position.x - 80}
-        y={position.y - 100}
-        width="160"
-        height="200"
-        className="pointer-events-none"
-      >
-        <div className="flex flex-col items-center">
-          <div className={`px-4 py-2 backdrop-blur-xl bg-slate-900/90 border-2 ${variant.border} rounded-lg ${variant.glow}`}>
-            <h4 className={`${variant.text} text-center text-sm mb-1`}>{title}</h4>
-            <div className="flex items-center justify-center gap-2 text-xs text-slate-400">
-              <span>{moduleCount} módulos</span>
-              <span>•</span>
-              <span>{progress}%</span>
-            </div>
-          </div>
-        </div>
-      </foreignObject>
-
-      {/* Interactive hover area */}
-      <circle
-        cx={position.x}
-        cy={position.y}
-        r="60"
-        fill="transparent"
-        className="cursor-pointer"
-      />
+      // Versión alternativa con click en foreignObject también
+<foreignObject
+  x={position.x - 80}
+  y={position.y - 100}
+  width="160"
+  height="200"
+  onClick={(e) => {
+    e.stopPropagation();
+    console.log("🖱️ Click en foreignObject");
+    onClick();
+  }}
+  style={{ cursor: 'pointer' }} // ✅ Cambio: permitir clicks
+>
+  <div 
+    className="flex flex-col items-center"
+    onClick={(e) => {
+      e.stopPropagation();
+      console.log("🖱️ Click en div interno");
+      onClick();
+    }}
+  >
+    <div className={`px-4 py-2 backdrop-blur-xl bg-slate-900/90 border-2 ${variant.border} rounded-lg ${variant.glow}`}>
+      <h4 className={`${variant.text} text-center text-sm mb-1`}>{title}</h4>
+      <div className="flex items-center justify-center gap-2 text-xs text-slate-400">
+        <span>{moduleCount} módulos</span>
+        <span>•</span>
+        <span>{progress}%</span>
+      </div>
+    </div>
+  </div>
+</foreignObject>
     </motion.g>
   );
 }

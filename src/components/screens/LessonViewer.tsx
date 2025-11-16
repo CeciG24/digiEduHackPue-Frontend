@@ -8,6 +8,25 @@ import { Type, Contrast, Volume2, Download, Bot } from 'lucide-react';
 export function LessonViewer() {
   const [textSize, setTextSize] = useState(1);
   const [highContrast, setHighContrast] = useState(false);
+  const handleTextToSpeech = () => {
+  const utterance = new window.SpeechSynthesisUtterance(
+    'Neural networks are computing systems inspired by the biological neural networks...'
+  );
+
+  // Elegir la voz (ejemplo: Google US English)
+  const voices = window.speechSynthesis.getVoices();
+  const selectedVoice = voices.find(voice => voice.name === 'Google US English');
+  if (selectedVoice) {
+    utterance.voice = selectedVoice;
+  }
+
+  // Ajustar velocidad y pitch para que suene más natural
+  utterance.rate = 1.0; // velocidad (0.1 a 10, 1 = normal)
+  utterance.pitch = 1.2; // tono (0 a 2, 1 = normal)
+  utterance.volume = 1; // volumen (0 a 1)
+
+  window.speechSynthesis.speak(utterance);
+};
 
   return (
     <div className="min-h-screen p-8">
@@ -37,7 +56,7 @@ export function LessonViewer() {
                 </button>
                 <button
                   className="p-2 rounded bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors"
-                  title="Text to speech"
+                  title="Text to speech" onClick={handleTextToSpeech}
                 >
                   <Volume2 className="w-5 h-5" />
                 </button>

@@ -130,20 +130,29 @@ export function MissionMap({ onNavigate }: MissionMapProps) {
             <rect width="800" height="600" fill="url(#bgGradient)" />
 
             {/* Learning Path Constellations */}
-            {(learningPaths ?? []).map((path) => (
-              <ConstellationCard
-                key={path.id}
-                id={path.id}
-                title={path.title}
-                description={path.description}
-                progress={path.progress}
-                moduleCount={path.moduleCount}
-                color={path.color}
-                position={path.position}
-                stars={path.stars}
-                onClick={() => onNavigate('path-overview', { pathId: path.id })}
-              />
-            ))}
+            // En MissionMap.tsx, encuentra la parte donde renderizas las rutas:
+
+{(learningPaths ?? []).map((path) => {
+  console.log("🎨 Renderizando ruta:", path.id, path.title);
+  return (
+    <ConstellationCard
+      key={path.id}
+      id={path.id}
+      title={path.title}
+      description={path.description}
+      progress={path.progress}
+      moduleCount={path.moduleCount}
+      color={path.color}
+      position={path.position}
+      stars={path.stars}
+      onClick={() => {
+        console.log("🎯 Click detectado en ruta:", path.id, path.title);
+        console.log("🔄 Llamando onNavigate con:", { pathId: path.id });
+        onNavigate('path-overview', { pathId: path.id });
+      }}
+    />
+  );
+})}
           </svg>
         </div>
 

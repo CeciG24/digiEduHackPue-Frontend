@@ -3,7 +3,7 @@ import { GlassPanel } from '../ui-sci-fi/GlassPanel';
 import { HolographicButton } from '../ui-sci-fi/HolographicButton';
 import { NeonDivider } from '../ui-sci-fi/NeonDivider';
 import { Type, Contrast, Volume2, Download, Eye, Minimize2, Moon, Sun } from 'lucide-react';
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 
 export function AccessibilityTools() {
   const [settings, setSettings] = useState({
@@ -15,9 +15,40 @@ export function AccessibilityTools() {
     darkMode: true
   });
 
+  // ...existing code...
   const toggleSetting = (key: keyof typeof settings) => {
-    setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+    setSettings(prev => {
+      const updated = { ...prev, [key]: !prev[key] };
+      localStorage.setItem("accessibility-settings", JSON.stringify(updated));
+      return updated;
+    });
   };
+
+  // Cargar settings guardados al montar para que el toggle tenga efecto real
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const saved = localStorage.getItem("accessibility-settings");
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved);
+      setSettings(prev => ({ ...prev, ...parsed }));
+    } catch (e) {
+      console.warn("accessibility-settings: JSON parse error", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    const body = document.querySelector("body");
+    if (!body) return;
+
+    if (settings.dyslexiaFont) {
+      body.classList.add("dyslexia-font");
+    } else {
+      body.classList.remove("dyslexia-font");
+    }
+
+    console.log("CLASE APLICADA:", settings.dyslexiaFont); // <-- debugeo
+  }, [settings.dyslexiaFont]);
 
   return (
     <div className="min-h-screen p-8">
