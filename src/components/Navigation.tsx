@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Home, Map, BookOpen, Target, Brain, Settings, LogOut, Mic, MicOff } from 'lucide-react';
+import { Home, Map, BookOpen, Target, Brain, Settings, LogOut, Mic, MicOff,UserCog } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface NavigationProps {
@@ -16,6 +16,7 @@ export function Navigation({ currentScreen, onNavigate }: NavigationProps) {
   const navItems = [
     { id: 'welcome', icon: Home, label: 'Mission Control' },
     { id: 'map', icon: Map, label: 'Mission Map' },
+    { id: 'teacher', icon: UserCog, label: 'Teacher Dashboard' },
     { id: 'lesson', icon: BookOpen, label: 'Lección' },
     { id: 'assessment', icon: Target, label: 'Evaluación' },
     { id: 'ai-core', icon: Brain, label: 'IA Core' },

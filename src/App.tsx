@@ -12,6 +12,7 @@ import { AccessibilityTools } from './components/screens/AccessibilityTools';
 import { Login } from './components/screens/Login';
 import { Register } from './components/screens/Register';
 import UserProfile from './components/screens/UserProfile';
+import { TeacherDashboard } from './components/screens/TeacherDashboard';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 interface NavigationData {
@@ -108,6 +109,8 @@ const handleNavigate = (screen: string, data?: NavigationData) => {
         return <AccessibilityTools />;
       case 'user-profile':
         return <UserProfile />;
+      case 'teacher-dashboard':
+        return <TeacherDashboard onNavigate={handleNavigate} />;
       default:
         return <WelcomeConsole onNavigate={handleNavigate} />;
     }
